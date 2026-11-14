@@ -39,3 +39,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
     `unit_amount` comes straight from the request body. Server-side price lookups are fine.
 - Client tokens that are public by design (for example Paddle's `CLIENT_TOKEN`) are no longer reported by
   SEC-003.
+- A test suite you can trust: end-to-end tests of the real binary (exit codes, JSON, `--output`,
+  `--quiet`, no colour when piped), a demo app with every problem planted and a snapshot of its report,
+  150 generated keys that must never appear unmasked, odd files (binary, invalid UTF-8, CRLF, unclosed SQL
+  comments, deep folders, symlink loops) and a speed check of 5,000 files in under a second.
+- CI runs the tests on Linux, macOS and Windows.

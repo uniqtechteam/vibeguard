@@ -1,0 +1,39 @@
+CRITICAL
+  PAY-001 Stripe webhook without signature check
+    app/api/stripe/webhook/route.ts:6
+    > if (event.type === 'checkout.session.completed') {
+    Why: This webhook acts on Stripe events without checking Stripe's signature, so anyone can send a fake "payment succeeded" and get the product for free.
+    Fix: Read the raw body and call `stripe.webhooks.constructEvent(body, signature, webhookSecret)` before trusting the event.
+
+  SEC-002 Supabase service-role key in browser code
+    components/AdminTable.tsx:4
+    > const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    Why: This code runs in the browser, and the service-role key skips every Row Level Security rule, so anyone can read and change all of your data with it.
+    Fix: Use the anon key in the browser and move anything that needs the service-role key into a server route or edge function.
+
+  DB-001 Supabase table without Row Level Security
+    supabase/migrations/20250101000000_init.sql:1
+    > create table profiles (
+    Why: Table `profiles` has no Row Level Security, so anyone with your public anon key can read and change every row.
+    Fix: Add `alter table profiles enable row level security;` in a migration, then add policies that limit rows to their owner.
+
+HIGH
+  SEC-003 Secret exposed through a client variable
+    .env.example:3
+    > NEXT_PUBLIC_STRIPE_SECRET_KEY=
+    Why: `NEXT_PUBLIC_STRIPE_SECRET_KEY` is built into the JavaScript every visitor downloads, so its value is public.
+    Fix: Rename it without the public prefix and read it only in server code; if it was ever deployed, rotate the value.
+
+  PAY-002 Payment amount taken from the request  (check by hand)
+    app/api/checkout/route.ts:9
+    > line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: amount, product_data: { name: 'Pro' } } }],
+    Why: The amount charged comes from the request, so a customer can change it and pay whatever they like.
+    Fix: Look the price up on the server (a Stripe Price id or your own table) from a product id, and never accept an amount from the client.
+
+  DB-002 Row Level Security policy that lets anyone write
+    supabase/migrations/20250101000000_init.sql:12
+    > create policy "anyone can mark orders" on orders for update to anon using (true);
+    Why: This policy on `orders` lets anyone update any row, because its condition is just `true`.
+    Fix: Replace `true` with a real check, for example `auth.uid() = user_id`.
+
+3 critical · 3 high · 0 medium · 0 low · 7 files in <time>

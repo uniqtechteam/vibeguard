@@ -436,6 +436,7 @@ version = "0.1.0-dev"
 dependencies = [
  "clap",
  "serde_json",
+ "tempfile",
  "vibeguard-core",
 ]
 
