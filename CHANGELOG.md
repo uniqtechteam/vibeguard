@@ -27,3 +27,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
     `EXPO_PUBLIC_`, `REACT_APP_`, `PUBLIC_`). Names with SECRET, PRIVATE or SERVICE_ROLE are certain;
     other `_KEY` / `TOKEN` names are reported as worth a look. Keys that are public by design (anon,
     publishable, Firebase web config) are not reported.
+  - **DB-001** reads `supabase/migrations` in order and reports every table in `public` that never gets
+    Row Level Security. Quoted names, `if exists`, `only`, dropped tables and comments are handled.
+  - **DB-002** reports policies that let anyone, or any signed-in user, insert, update or delete every
+    row (`using (true)` / `with check (true)`). Public read policies are fine and not reported.
+  - **DB-003** reports upload policies on `storage.objects` that never check who is uploading, when a
+    public bucket exists.
