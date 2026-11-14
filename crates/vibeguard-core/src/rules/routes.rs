@@ -46,6 +46,10 @@ const AUTH_MARKERS: &[&str] = &[
     "CRON_SECRET",
     "API_SECRET",
     "isAdmin",
+    // the auth library's own endpoints
+    "toNextJsHandler",
+    "NextAuth",
+    "handlers",
 ];
 
 fn has_auth(text: &str) -> bool {
@@ -165,7 +169,11 @@ impl Rule for UnprotectedRoute {
                 continue;
             }
             let route = route_path(&file.path).unwrap_or_default();
-            if covered(&route, cover.as_ref()) {
+            // sign-in, sign-up and callback endpoints are public by design
+            if route == "/api/auth"
+                || route.starts_with("/api/auth/")
+                || covered(&route, cover.as_ref())
+            {
                 continue;
             }
             let app_router = file.name().starts_with("route.");

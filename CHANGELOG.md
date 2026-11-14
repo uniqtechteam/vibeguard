@@ -70,4 +70,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Release builds for Linux (x86_64, aarch64), macOS (Intel, Apple Silicon) and Windows, with SHA-256
   checksums. Each release installs and runs the published Action on all three systems before anything
   is published to crates.io.
+- Fewer false alarms, found by scanning 12 public starter apps: `.env` files that hold only public values
+  (`EXPO_PUBLIC_…`, anon keys) or template placeholders (`your_key_here`, `changeme`, `<token>`) are not
+  reported; commented-out variables are skipped; auth library endpoints (`/api/auth/...`, NextAuth,
+  Better Auth handlers) are not reported as unprotected routes.
 

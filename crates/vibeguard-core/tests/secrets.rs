@@ -225,3 +225,30 @@ fn sec_003_ignores_public_prefixes_outside_web_code_and_env_files() {
     );
     assert_eq!(findings(dir.path(), "SEC-003"), Vec::<Finding>::new());
 }
+
+#[test]
+fn sec_001_ignores_env_files_with_only_public_values_or_placeholders() {
+    let dir = tempfile::tempdir().unwrap();
+    write(
+        dir.path(),
+        "mobile/.env",
+        "EXPO_PUBLIC_SUPABASE_URL=https://abc.supabase.co\nEXPO_PUBLIC_SUPABASE_ANON_KEY=eyJpublic\n",
+    );
+    write(
+        dir.path(),
+        ".env",
+        "CLERK_SECRET_KEY=your_clerk_secret_key\nSTRIPE_SECRET_KEY=\nAPI_TOKEN=<token>\n# OPENAI_API_KEY=sk-real-looking-but-commented\nJWT_SECRET=changeme\n",
+    );
+    assert_eq!(findings(dir.path(), "SEC-001"), Vec::<Finding>::new());
+}
+
+#[test]
+fn sec_003_skips_commented_lines_in_env_files() {
+    let dir = tempfile::tempdir().unwrap();
+    write(
+        dir.path(),
+        ".env.production",
+        "# NEXT_PUBLIC_SERVICE_ROLE_KEY=\n",
+    );
+    assert_eq!(findings(dir.path(), "SEC-003"), Vec::<Finding>::new());
+}

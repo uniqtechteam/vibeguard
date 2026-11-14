@@ -168,8 +168,53 @@ fn has_secret_assignment(text: &str) -> bool {
     let Some(re) = SECRET_ASSIGNMENT.as_ref() else {
         return false;
     };
-    text.lines()
-        .any(|l| re.is_match(l) && !l.contains("NEXT_PUBLIC_") && !l.contains("VITE_"))
+    text.lines().any(|l| {
+        let l = l.trim();
+        if l.starts_with('#') || !re.is_match(l) {
+            return false;
+        }
+        let (name, value) = l.split_once('=').unwrap_or((l, ""));
+        let name = name.trim().trim_start_matches("export ").trim();
+        let public = [
+            "NEXT_PUBLIC_",
+            "VITE_",
+            "EXPO_PUBLIC_",
+            "REACT_APP_",
+            "PUBLIC_",
+        ]
+        .iter()
+        .any(|p| name.starts_with(p));
+        !public && !is_placeholder(value)
+    })
+}
+
+/// Words that mark a template value rather than a real secret.
+const PLACEHOLDER_WORDS: &[&str] = &[
+    "changeme",
+    "change_me",
+    "placeholder",
+    "example",
+    "replace",
+    "todo",
+    "secret",
+    "dummy",
+    "test",
+    "none",
+    "null",
+    "here",
+];
+
+/// Values people commit on purpose in templates: `your_key_here`, `<secret>`, `xxx`, `changeme`, ….
+fn is_placeholder(value: &str) -> bool {
+    let v = value.trim().trim_matches(['"', '\'']).to_ascii_lowercase();
+    v.is_empty()
+        || v.starts_with("your")
+        || v.starts_with('<')
+        || v.starts_with("${")
+        || v.chars().all(|c| matches!(c, 'x' | '*' | '.' | '_' | '-'))
+        || PLACEHOLDER_WORDS
+            .iter()
+            .any(|w| v == *w || v.split(['_', '-']).any(|part| part == *w))
 }
 
 // ---------------------------------------------------------------- SEC-002
@@ -369,6 +414,9 @@ impl Rule for SecretInClientVariable {
             let Some(text) = file.text() else { continue };
             let mut seen = BTreeSet::new();
             for (i, line) in text.lines().enumerate() {
+                if is_env_file(file) && line.trim_start().starts_with('#') {
+                    continue;
+                }
                 for m in re.find_iter(line) {
                     let name = m.as_str();
                     let Some(meta) = classify(name) else { continue };
