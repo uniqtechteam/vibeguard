@@ -49,7 +49,11 @@ pub fn summary_line(report: &Report) -> String {
         s.medium,
         s.low,
         thousands(report.scanned_files),
-        if report.scanned_files == 1 { "file" } else { "files" },
+        if report.scanned_files == 1 {
+            "file"
+        } else {
+            "files"
+        },
         report.duration().as_secs_f64()
     )
 }
