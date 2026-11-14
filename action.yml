@@ -1,0 +1,117 @@
+name: vibeguard
+description: Find the security holes AI-built apps ship with (open Supabase tables, leaked keys, unverified Stripe webhooks) before your users do.
+author: UniqTech
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  path:
+    description: Folder to scan.
+    default: "."
+  fail-on:
+    description: Fail the job on findings at least this severe (critical, high, medium, low, never).
+    default: high
+  sarif:
+    description: Upload results to GitHub code scanning (needs `security-events: write`).
+    default: "true"
+  version:
+    description: vibeguard release to use, for example v0.1.0. Defaults to the latest release.
+    default: latest
+  args:
+    description: Extra arguments for `vibeguard scan`, for example `--strict --skip CFG-001`.
+    default: ""
+  binary:
+    description: Path to an existing vibeguard binary (skips the download; used to test the Action itself).
+    default: ""
+
+outputs:
+  findings:
+    description: Number of findings.
+    value: ${{ steps.scan.outputs.findings }}
+  sarif-file:
+    description: Path of the SARIF report.
+    value: ${{ steps.scan.outputs.sarif-file }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install vibeguard
+      id: install
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        VERSION: ${{ inputs.version }}
+        BINARY: ${{ inputs.binary }}
+      run: |
+        set -euo pipefail
+        if [ -n "$BINARY" ]; then
+          echo "bin=$BINARY" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        case "${RUNNER_OS}-${RUNNER_ARCH}" in
+          Linux-X64)   target=x86_64-unknown-linux-musl;  ext=tar.gz ;;
+          Linux-ARM64) target=aarch64-unknown-linux-musl; ext=tar.gz ;;
+          macOS-X64)   target=x86_64-apple-darwin;        ext=tar.gz ;;
+          macOS-ARM64) target=aarch64-apple-darwin;       ext=tar.gz ;;
+          Windows-X64) target=x86_64-pc-windows-msvc;     ext=zip ;;
+          *) echo "::error::No vibeguard build for ${RUNNER_OS}-${RUNNER_ARCH}; use 'cargo install vibeguard' instead."; exit 1 ;;
+        esac
+        dir="$RUNNER_TEMP/vibeguard"
+        mkdir -p "$dir"
+        tag=()
+        if [ "$VERSION" != "latest" ]; then tag=("$VERSION"); fi
+        gh release download "${tag[@]}" --repo uniqtechteam/vibeguard \
+          --pattern "vibeguard-${target}.${ext}" --pattern "vibeguard-${target}.${ext}.sha256" \
+          --dir "$dir" --clobber
+        cd "$dir"
+        if command -v sha256sum >/dev/null; then sha256sum -c "vibeguard-${target}.${ext}.sha256"; else shasum -a 256 -c "vibeguard-${target}.${ext}.sha256"; fi
+        if [ "$ext" = zip ]; then
+          pwsh -NoProfile -Command "Expand-Archive -Force -Path 'vibeguard-${target}.zip' -DestinationPath '.'"
+          bin="$dir/vibeguard.exe"
+        else
+          tar xzf "vibeguard-${target}.tar.gz"
+          bin="$dir/vibeguard"
+        fi
+        echo "bin=$bin" >> "$GITHUB_OUTPUT"
+
+    - name: Scan
+      id: scan
+      shell: bash
+      env:
+        BIN: ${{ steps.install.outputs.bin }}
+        SCAN_PATH: ${{ inputs.path }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        EXTRA: ${{ inputs.args }}
+      run: |
+        set -uo pipefail
+        sarif="$RUNNER_TEMP/vibeguard.sarif"
+        # shellcheck disable=SC2086
+        "$BIN" scan "$SCAN_PATH" --fail-on never --format sarif --output "$sarif" $EXTRA || exit 2
+        # shellcheck disable=SC2086
+        "$BIN" scan "$SCAN_PATH" --fail-on "$FAIL_ON" $EXTRA
+        code=$?
+        findings=$(grep -c '"ruleId"' "$sarif" || true)
+        echo "findings=$findings" >> "$GITHUB_OUTPUT"
+        echo "sarif-file=$sarif" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        {
+          echo "## vibeguard"
+          echo
+          "$BIN" scan "$SCAN_PATH" --fail-on never --format markdown $EXTRA | tail -n +3
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Upload to code scanning
+      if: ${{ inputs.sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif-file }}
+        category: vibeguard
+      continue-on-error: true
+
+    - name: Fail on findings
+      if: ${{ steps.scan.outputs.exit-code != '0' }}
+      shell: bash
+      run: |
+        echo "::error::vibeguard found problems at or above '${{ inputs.fail-on }}'. See the job summary."
+        exit 1

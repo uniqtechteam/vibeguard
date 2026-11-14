@@ -39,6 +39,33 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace
 
+  action:
+    name: the Action, with a freshly built binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --quiet
+      - id: vibeguard
+        uses: ./
+        with:
+          binary: target/debug/vibeguard
+          path: tests/fixtures/demo-app
+          fail-on: never
+          sarif: "false"
+      - name: Check the Action found the planted problems
+        run: test "${{ steps.vibeguard.outputs.findings }}" = "8"
+      - id: failing
+        uses: ./
+        continue-on-error: true
+        with:
+          binary: target/debug/vibeguard
+          path: tests/fixtures/demo-app
+          sarif: "false"
+      - name: Check the Action fails the job on critical findings
+        run: test "${{ steps.failing.outcome }}" = "failure"
+
   speed:
     name: speed (5,000 files under 1 s, release build)
     runs-on: ubuntu-latest

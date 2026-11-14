@@ -64,4 +64,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
   ones. Fingerprints ignore line numbers, so editing elsewhere in a file does not bring old findings back.
 - `--format sarif` (validated against the official SARIF 2.1.0 schema, with GitHub security-severity
   levels) and `--format markdown` for pull request comments.
+- GitHub Action: `uses: uniqtechteam/vibeguard@v0` downloads the right binary (checksum verified), scans,
+  uploads SARIF to code scanning, writes a summary to the job page and fails on findings at or above
+  `fail-on`.
+- Release builds for Linux (x86_64, aarch64), macOS (Intel, Apple Silicon) and Windows, with SHA-256
+  checksums. Each release installs and runs the published Action on all three systems before anything
+  is published to crates.io.
 
