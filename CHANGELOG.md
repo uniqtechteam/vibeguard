@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-14
+
+First release.
+
 ### Added
 
 - Project setup: the `vibeguard` command line tool and the `vibeguard-core` rule engine.
@@ -75,3 +79,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
   reported; commented-out variables are skipped; auth library endpoints (`/api/auth/...`, NextAuth,
   Better Auth handlers) are not reported as unprotected routes.
 
+[Unreleased]: https://github.com/uniqtechteam/vibeguard/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/uniqtechteam/vibeguard/releases/tag/v0.1.0
