@@ -1,5 +1,5 @@
 name: vibeguard
-description: Find the security holes AI-built apps ship with (open Supabase tables, leaked keys, unverified Stripe webhooks) before your users do.
+description: "Find the security holes AI-built apps ship with (open Supabase tables, leaked keys, unverified Stripe webhooks) before your users do."
 author: UniqTech
 branding:
   icon: shield
@@ -7,30 +7,30 @@ branding:
 
 inputs:
   path:
-    description: Folder to scan.
+    description: "Folder to scan."
     default: "."
   fail-on:
-    description: Fail the job on findings at least this severe (critical, high, medium, low, never).
+    description: "Fail the job on findings at least this severe (critical, high, medium, low, never)."
     default: high
   sarif:
-    description: Upload results to GitHub code scanning (needs `security-events: write`).
+    description: "Upload results to GitHub code scanning (needs `security-events: write`)."
     default: "true"
   version:
-    description: vibeguard release to use, for example v0.1.0. Defaults to the latest release.
+    description: "vibeguard release to use, for example v0.1.0. Defaults to the latest release."
     default: latest
   args:
-    description: Extra arguments for `vibeguard scan`, for example `--strict --skip CFG-001`.
+    description: "Extra arguments for `vibeguard scan`, for example `--strict --skip CFG-001`."
     default: ""
   binary:
-    description: Path to an existing vibeguard binary (skips the download; used to test the Action itself).
+    description: "Path to an existing vibeguard binary (skips the download; used to test the Action itself)."
     default: ""
 
 outputs:
   findings:
-    description: Number of findings.
+    description: "Number of findings."
     value: ${{ steps.scan.outputs.findings }}
   sarif-file:
-    description: Path of the SARIF report.
+    description: "Path of the SARIF report."
     value: ${{ steps.scan.outputs.sarif-file }}
 
 runs:
