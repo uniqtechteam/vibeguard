@@ -17,7 +17,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: taiki-e/create-gh-release-action@v1
         with:
-          changelog: CHANGELOG.md
+          # release candidates have no changelog section yet
+          changelog: ${{ !contains(github.ref_name, '-') && 'CHANGELOG.md' || '' }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
           title: vibeguard $version
           token: ${{ secrets.GITHUB_TOKEN }}
 
