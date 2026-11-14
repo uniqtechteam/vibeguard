@@ -4,24 +4,24 @@
 //! Nothing here touches the network.
 
 mod finding;
+pub mod mask;
+mod project;
+mod report;
 pub mod rule;
 
 use std::path::Path;
 
 pub use finding::{Confidence, Finding, Severity};
+pub use project::{MAX_FILE_BYTES, Project, SourceFile, Stack};
+pub use report::{FailOn, Report, Summary, scan_with};
 
 /// Version of the engine, shown by `vibeguard --version`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// Run every rule over the project at `root` and return the findings, most severe first.
-#[must_use]
-pub fn scan(root: &Path) -> Vec<Finding> {
-    let mut findings: Vec<Finding> = rule::all().iter().flat_map(|r| r.check(root)).collect();
-    findings.sort_by(|a, b| {
-        b.severity
-            .cmp(&a.severity)
-            .then_with(|| a.file.cmp(&b.file))
-            .then_with(|| a.line.cmp(&b.line))
-    });
-    findings
+/// Run every rule over the project at `root`.
+///
+/// # Errors
+/// When `root` does not exist or is not a folder.
+pub fn scan(root: &Path) -> std::io::Result<Report> {
+    scan_with(root, &rule::all())
 }

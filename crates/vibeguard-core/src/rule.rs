@@ -1,18 +1,18 @@
 //! The rule interface and the list of rules the engine runs.
 
-use std::path::Path;
-
-use crate::Finding;
+use crate::{Finding, Project};
 
 /// A single check. Rules are stateless: they read the project and return what they found.
-pub trait Rule {
+pub trait Rule: Send + Sync {
     /// Stable id, for example `DB-001`.
     fn id(&self) -> &'static str;
-    /// Look at the project under `root` and report findings.
-    fn check(&self, root: &Path) -> Vec<Finding>;
+    /// Short title, for example `Supabase table without Row Level Security`.
+    fn title(&self) -> &'static str;
+    /// Look at the project and report findings. Snippets must already be masked.
+    fn check(&self, project: &Project) -> Vec<Finding>;
 }
 
-/// Every rule, in the order they run. Empty until the first rules land.
+/// Every rule, in the order they run.
 #[must_use]
 pub fn all() -> Vec<Box<dyn Rule>> {
     Vec::new()

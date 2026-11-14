@@ -46,6 +46,8 @@ fn bad_fixtures_produce_exactly_the_expected_findings() {
         let mut expected: Vec<Expected> = serde_json::from_str(&raw)
             .unwrap_or_else(|e| panic!("{}: bad expected.json: {e}", bad.display()));
         let mut got: Vec<Expected> = vibeguard_core::scan(&bad)
+            .unwrap_or_else(|e| panic!("{}: {e}", bad.display()))
+            .findings
             .into_iter()
             .map(|f| Expected {
                 rule: f.rule,
@@ -72,6 +74,8 @@ fn good_fixtures_produce_no_finding_of_their_rule() {
             .unwrap_or_default()
             .to_owned();
         let hits: Vec<_> = vibeguard_core::scan(&good)
+            .unwrap_or_else(|e| panic!("{}: {e}", good.display()))
+            .findings
             .into_iter()
             .filter(|f| f.rule == rule)
             .collect();
