@@ -1,0 +1,9 @@
+flowchart LR
+    A["vibeguard scan"] --> B["Walker<br/>respects .gitignore,<br/>skips node_modules"]
+    B --> C["Project<br/>files read once,<br/>stack detected"]
+    C --> D{"12 rules<br/>secrets · Supabase ·<br/>Firebase · routes ·<br/>Stripe · CORS · config"}
+    D --> E["Findings<br/>secrets masked"]
+    E --> F["Filters<br/>vibeguard.toml paths,<br/>ignore comments,<br/>baseline"]
+    F --> G["pretty / JSON /<br/>Markdown"]
+    F --> H["SARIF →<br/>GitHub code scanning"]
+    F --> I["exit code<br/>by --fail-on"]
