@@ -157,6 +157,8 @@ fn demo_app_reports_every_planted_problem() {
     assert_eq!(
         got,
         [
+            "API-001 app/api/checkout/route.ts:5",
+            "CFG-001 next.config.mjs:3",
             "DB-001 supabase/migrations/20250101000000_init.sql:1",
             "DB-002 supabase/migrations/20250101000000_init.sql:12",
             "PAY-001 app/api/stripe/webhook/route.ts:6",
@@ -194,7 +196,7 @@ fn output_flag_writes_the_report_to_a_file() {
         "nothing on stdout when --output is used"
     );
     let v: serde_json::Value = serde_json::from_str(&fs::read_to_string(out).unwrap()).unwrap();
-    assert_eq!(v["findings"].as_array().unwrap().len(), 6);
+    assert_eq!(v["findings"].as_array().unwrap().len(), 8);
 }
 
 #[test]
@@ -202,7 +204,10 @@ fn quiet_prints_only_the_summary() {
     let o = run(&["scan", demo_app().to_str().unwrap(), "--quiet"]);
     let text = stdout(&o);
     assert_eq!(text.lines().count(), 1, "{text}");
-    assert!(text.starts_with("3 critical · 3 high · 0 medium · 0 low · "));
+    assert!(
+        text.starts_with("3 critical · 4 high · 0 medium · 1 low · "),
+        "{text}"
+    );
 }
 
 #[test]

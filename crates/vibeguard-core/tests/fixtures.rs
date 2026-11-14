@@ -45,10 +45,17 @@ fn bad_fixtures_produce_exactly_the_expected_findings() {
             .unwrap_or_else(|_| panic!("{} needs an expected.json", bad.display()));
         let mut expected: Vec<Expected> = serde_json::from_str(&raw)
             .unwrap_or_else(|e| panic!("{}: bad expected.json: {e}", bad.display()));
+        let rule = dir
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or_default()
+            .to_owned();
+        // each fixture asserts its own rule; other rules may legitimately fire on the same code
         let mut got: Vec<Expected> = vibeguard_core::scan(&bad)
             .unwrap_or_else(|e| panic!("{}: {e}", bad.display()))
             .findings
             .into_iter()
+            .filter(|f| f.rule == rule)
             .map(|f| Expected {
                 rule: f.rule,
                 file: f.file,

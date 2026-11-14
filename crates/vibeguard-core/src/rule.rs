@@ -36,9 +36,12 @@ pub trait Rule: Send + Sync {
 /// Every rule, in the order they run.
 #[must_use]
 pub fn all() -> Vec<Box<dyn Rule>> {
+    use crate::rules::firebase::OpenFirebaseRules;
+    use crate::rules::routes::UnprotectedRoute;
     use crate::rules::secrets::{CommittedSecrets, SecretInClientVariable, ServiceRoleInBrowser};
     use crate::rules::stripe::{ClientChosenPrice, UnverifiedWebhook};
     use crate::rules::supabase::{OpenStorageUpload, OpenWritePolicy, TableWithoutRls};
+    use crate::rules::web::{OpenCors, UnsafeBuildSettings};
     vec![
         Box::new(CommittedSecrets),
         Box::new(ServiceRoleInBrowser),
@@ -48,6 +51,10 @@ pub fn all() -> Vec<Box<dyn Rule>> {
         Box::new(OpenStorageUpload),
         Box::new(UnverifiedWebhook),
         Box::new(ClientChosenPrice),
+        Box::new(OpenFirebaseRules),
+        Box::new(UnprotectedRoute),
+        Box::new(OpenCors),
+        Box::new(UnsafeBuildSettings),
     ]
 }
 

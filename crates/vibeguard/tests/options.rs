@@ -251,7 +251,7 @@ fn ac_002_sarif_is_valid_against_the_official_schema() {
         .collect();
     assert!(errors.is_empty(), "{errors:#?}");
     let results = sarif["runs"][0]["results"].as_array().unwrap();
-    assert_eq!(results.len(), 6);
+    assert_eq!(results.len(), 8);
     for r in results {
         assert!(
             r["partialFingerprints"]["vibeguard/v1"]
@@ -271,10 +271,13 @@ fn markdown_is_a_table_with_every_finding() {
         "markdown",
     ]));
     assert!(text.starts_with("## vibeguard\n\n| Severity | Rule | Where | Code | Why | Fix |"));
-    assert_eq!(
-        text.lines()
-            .filter(|l| l.starts_with("| critical") || l.starts_with("| high"))
-            .count(),
-        6
-    );
+    let rows = text
+        .lines()
+        .filter(|l| {
+            ["| critical", "| high", "| medium", "| low"]
+                .iter()
+                .any(|p| l.starts_with(p))
+        })
+        .count();
+    assert_eq!(rows, 8, "{text}");
 }

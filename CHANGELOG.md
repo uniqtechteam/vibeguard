@@ -37,6 +37,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
     `invoice.*`, …) without ever calling `stripe.webhooks.constructEvent`.
   - **PAY-002** reports `checkout.sessions.create` / `paymentIntents.create` calls whose `amount` or
     `unit_amount` comes straight from the request body. Server-side price lookups are fine.
+  - **FB-001** reports Firestore and Storage rules like `allow write: if true;` or `allow read, write;`,
+    the generated "test mode" rule, and `".write": true` in `database.rules.json`.
+  - **API-001** reports Next.js route handlers that export POST, PUT, PATCH or DELETE (and `pages/api`
+    handlers that write to the database) without any session, token or signature check. Routes covered
+    by an authenticating `middleware.ts` matcher are left alone. Reported as worth a look.
+  - **WEB-001** reports CORS that allows every origin (`origin: true`, `*`, or the request's own Origin)
+    together with credentials.
+  - **CFG-001** reports `ignoreBuildErrors`, `ignoreDuringBuilds`, `productionBrowserSourceMaps` and Vite
+    `build.sourcemap` left on.
 - Client tokens that are public by design (for example Paddle's `CLIENT_TOKEN`) are no longer reported by
   SEC-003.
 - A test suite you can trust: end-to-end tests of the real binary (exit codes, JSON, `--output`,

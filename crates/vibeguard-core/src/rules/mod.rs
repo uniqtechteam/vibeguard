@@ -1,8 +1,11 @@
 //! The built-in rules and small helpers they share.
 
+pub mod firebase;
+pub mod routes;
 pub mod secrets;
 pub mod stripe;
 pub mod supabase;
+pub mod web;
 
 use crate::{Confidence, Finding, Severity, SourceFile};
 
