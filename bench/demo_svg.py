@@ -42,7 +42,8 @@ for line in out:
         for j, part in enumerate(wrapped):
             lines.append(("label" if j == 0 else "text", f"    {label}: {part}" if j == 0 else f"         {part}"))
     elif line.strip().startswith(">"):
-        lines.append(("code", line[: WRAP + 6]))
+        code = line if len(line) <= WRAP + 20 else line[: WRAP + 19] + "…"
+        lines.append(("code", code))
     elif line.startswith("    "):
         lines.append(("path", line))
     elif line and line[0].isdigit():
@@ -57,7 +58,7 @@ COLORS = {
 }
 BOLD = {"critical", "high", "medium", "low", "summary"}
 line_h, pad, top = 20, 20, 44
-width = 960
+width = 1010
 height = top + len(lines) * line_h + pad
 rows = []
 for i, (kind, text) in enumerate(lines):
