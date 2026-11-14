@@ -9,7 +9,7 @@ use regex::Regex;
 
 use super::{Meta, is_code, is_env_example, is_env_file, is_noise, line_no, short};
 use crate::mask::{mask, mask_in};
-use crate::rule::Rule;
+use crate::rule::{Rule, RuleInfo};
 use crate::{Confidence, Finding, Project, Severity, SourceFile, Stack};
 
 /// Known secret shapes: (what it is, pattern).
@@ -111,13 +111,14 @@ const SEC_001: Meta = Meta {
     confidence: Confidence::High,
 };
 
-impl Rule for CommittedSecrets {
-    fn id(&self) -> &'static str {
-        SEC_001.id
-    }
+const SEC_001_INFO: RuleInfo = SEC_001.info(
+    "Keys and secrets committed to the repo",
+    "Live Stripe keys, webhook secrets, AWS keys, private keys, OpenAI/Anthropic and GitHub tokens or a Supabase service-role key written into the code, or a .env file with secret values that git does not ignore. Anyone who can read the repository, including everyone with access to a fork or a leaked copy, can use them. Revoke and replace the key first, then load it from an environment variable that is never committed.",
+);
 
-    fn title(&self) -> &'static str {
-        SEC_001.title
+impl Rule for CommittedSecrets {
+    fn info(&self) -> &'static RuleInfo {
+        &SEC_001_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
@@ -226,13 +227,14 @@ pub(crate) fn runs_in_browser(file: &SourceFile, project: &Project) -> bool {
     project.uses(Stack::Vite) && !project.uses(Stack::NextJs) && seg("src/")
 }
 
-impl Rule for ServiceRoleInBrowser {
-    fn id(&self) -> &'static str {
-        SEC_002.id
-    }
+const SEC_002_INFO: RuleInfo = SEC_002.info(
+    "The Supabase service-role key used in browser code",
+    "The service-role key bypasses every Row Level Security rule. When it is used in a client component, a components/ file or a Vite src/ file, it is shipped to every visitor, who can then read and change all data. Use the anon key in the browser and keep the service-role key in server routes, edge functions or server-only files.",
+);
 
-    fn title(&self) -> &'static str {
-        SEC_002.title
+impl Rule for ServiceRoleInBrowser {
+    fn info(&self) -> &'static RuleInfo {
+        &SEC_002_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
@@ -348,13 +350,14 @@ fn classify(name: &str) -> Option<&'static Meta> {
     None
 }
 
-impl Rule for SecretInClientVariable {
-    fn id(&self) -> &'static str {
-        SEC_003_STRONG.id
-    }
+const SEC_003_INFO: RuleInfo = SEC_003_STRONG.info(
+    "Secret-looking variables with a public prefix",
+    "Variables starting with NEXT_PUBLIC_, VITE_, EXPO_PUBLIC_, REACT_APP_ or PUBLIC_ are copied into the JavaScript every visitor downloads. Names with SECRET, PRIVATE, SERVICE_ROLE or PASSWORD are reported as certain; other _KEY or TOKEN names as worth a look. Keys that are public by design (anon, publishable, Firebase web config, client tokens) are not reported.",
+);
 
-    fn title(&self) -> &'static str {
-        SEC_003_STRONG.title
+impl Rule for SecretInClientVariable {
+    fn info(&self) -> &'static RuleInfo {
+        &SEC_003_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {

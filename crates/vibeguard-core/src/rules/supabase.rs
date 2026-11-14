@@ -10,7 +10,7 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use super::{Meta, short};
-use crate::rule::Rule;
+use crate::rule::{Rule, RuleInfo};
 use crate::{Confidence, Finding, Project, Severity, SourceFile};
 
 /// Supabase migration files, oldest first.
@@ -126,13 +126,14 @@ const DB_001: Meta = Meta {
     confidence: Confidence::High,
 };
 
-impl Rule for TableWithoutRls {
-    fn id(&self) -> &'static str {
-        DB_001.id
-    }
+const DB_001_INFO: RuleInfo = DB_001.info(
+    "Supabase tables without Row Level Security",
+    "Supabase exposes tables in the public schema through its API, and the anon key that reaches it is public. A table without Row Level Security can be read and changed by anyone. vibeguard reads supabase/migrations in order and reports tables that never get `enable row level security`.",
+);
 
-    fn title(&self) -> &'static str {
-        DB_001.title
+impl Rule for TableWithoutRls {
+    fn info(&self) -> &'static RuleInfo {
+        &DB_001_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
@@ -331,13 +332,14 @@ const DB_002: Meta = Meta {
     confidence: Confidence::High,
 };
 
-impl Rule for OpenWritePolicy {
-    fn id(&self) -> &'static str {
-        DB_002.id
-    }
+const DB_002_INFO: RuleInfo = DB_002.info(
+    "Row Level Security policies that let anyone write",
+    "A policy for insert, update, delete or all whose condition is just `true` lets anyone (or any signed-in user) change every row. Public read policies are fine. Replace `true` with a real check such as `auth.uid() = user_id`.",
+);
 
-    fn title(&self) -> &'static str {
-        DB_002.title
+impl Rule for OpenWritePolicy {
+    fn info(&self) -> &'static RuleInfo {
+        &DB_002_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
@@ -378,13 +380,14 @@ const DB_003: Meta = Meta {
     confidence: Confidence::Medium,
 };
 
-impl Rule for OpenStorageUpload {
-    fn id(&self) -> &'static str {
-        DB_003.id
-    }
+const DB_003_INFO: RuleInfo = DB_003.info(
+    "Public storage buckets that anyone can upload to",
+    "A public bucket plus an upload policy on storage.objects that never checks auth lets anyone host files on your storage and your bill. Limit uploads to signed-in users and scope paths to their id.",
+);
 
-    fn title(&self) -> &'static str {
-        DB_003.title
+impl Rule for OpenStorageUpload {
+    fn info(&self) -> &'static RuleInfo {
+        &DB_003_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {

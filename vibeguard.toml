@@ -1,0 +1,5 @@
+# vibeguard scanning its own repository.
+# The fixtures are small projects with problems planted on purpose for the tests.
+
+[paths]
+ignore = ["tests/fixtures/**"]

@@ -94,6 +94,22 @@ pub(crate) struct Meta {
 }
 
 impl Meta {
+    /// The catalogue entry for a rule whose main finding uses this meta.
+    pub(crate) const fn info(
+        &self,
+        summary: &'static str,
+        explanation: &'static str,
+    ) -> crate::rule::RuleInfo {
+        crate::rule::RuleInfo {
+            id: self.id,
+            title: self.title,
+            severity: self.severity,
+            confidence: self.confidence,
+            summary,
+            explanation,
+        }
+    }
+
     pub(crate) fn finding(
         &self,
         file: &SourceFile,
@@ -119,6 +135,11 @@ impl Meta {
 /// 1-based line number for an index from `lines().enumerate()`.
 pub(crate) fn line_no(index: usize) -> Option<u32> {
     u32::try_from(index + 1).ok()
+}
+
+/// Trim a snippet to something readable in a terminal.
+pub(crate) fn short_line(line: &str) -> String {
+    short(line)
 }
 
 /// Trim a snippet to something readable in a terminal.

@@ -44,3 +44,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
   150 generated keys that must never appear unmasked, odd files (binary, invalid UTF-8, CRLF, unclosed SQL
   comments, deep folders, symlink loops) and a speed check of 5,000 files in under a second.
 - CI runs the tests on Linux, macOS and Windows.
+- `vibeguard rules` lists every rule; `vibeguard explain DB-001` explains one.
+- `--rules` and `--skip` choose which rules run; unknown ids stop with the list of valid ones.
+- `vibeguard.toml` at the project root: `fail_on`, `strict`, `skip` and `[paths] ignore` globs. Flags
+  win over the file.
+- Inline ignores: `vibeguard-ignore: DB-001 public lookup table` on the line or the line above. A reason
+  is required; a comment without one, or naming an unknown rule, is reported as `CFG-IGN`.
+  `--show-ignored` lists what was silenced and why.
+- Baselines: `--write-baseline FILE` records today's findings, `--baseline FILE` then reports only new
+  ones. Fingerprints ignore line numbers, so editing elsewhere in a file does not bring old findings back.
+- `--format sarif` (validated against the official SARIF 2.1.0 schema, with GitHub security-severity
+  levels) and `--format markdown` for pull request comments.
+

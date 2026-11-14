@@ -87,6 +87,8 @@ fn report(severity: Severity, confidence: Confidence) -> Report {
         }],
         summary: Summary::default(),
         internal_errors: Vec::new(),
+        ignored: Vec::new(),
+        baselined: 0,
     }
 }
 

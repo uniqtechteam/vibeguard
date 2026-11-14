@@ -2,7 +2,8 @@
 
 use std::fmt::Write as _;
 
-use vibeguard_core::{Confidence, Finding, Report, Severity};
+use vibeguard_core::rule::RuleInfo;
+use vibeguard_core::{Confidence, Finding, Report, Severity, rule};
 
 const RESET: &str = "\x1b[0m";
 const BOLD: &str = "\x1b[1m";
@@ -59,7 +60,7 @@ pub fn summary_line(report: &Report) -> String {
 }
 
 /// Readable terminal output, grouped by severity.
-pub fn pretty(report: &Report, color: bool, quiet: bool) -> String {
+pub fn pretty(report: &Report, color: bool, quiet: bool, show_ignored: bool) -> String {
     let paint = |code: &str, text: &str| {
         if color {
             format!("{code}{text}{RESET}")
@@ -111,8 +112,90 @@ pub fn pretty(report: &Report, color: bool, quiet: bool) -> String {
             }
         }
     }
+    if show_ignored && !quiet && !report.ignored.is_empty() {
+        let _ = writeln!(out, "{}", paint(DIM, "IGNORED"));
+        for i in &report.ignored {
+            let place = i.finding.line.map_or_else(
+                || i.finding.file.clone(),
+                |l| format!("{}:{l}", i.finding.file),
+            );
+            let _ = writeln!(out, "  {} {}  ({place})", i.finding.rule, i.finding.title);
+            let _ = writeln!(out, "    Reason: {}\n", i.reason);
+        }
+    }
+    let mut line = summary_line(report);
+    if !report.ignored.is_empty() {
+        let _ = write!(line, " · {} ignored", report.ignored.len());
+    }
+    if report.baselined > 0 {
+        let _ = write!(line, " · {} in baseline", report.baselined);
+    }
+    let _ = writeln!(out, "{line}");
+    out
+}
+
+/// A Markdown report for pull request comments.
+pub fn markdown(report: &Report) -> String {
+    let mut out = String::from("## vibeguard\n\n");
+    if report.findings.is_empty() {
+        out.push_str("No problems found.\n\n");
+    } else {
+        out.push_str("| Severity | Rule | Where | Code | Why | Fix |\n|---|---|---|---|---|---|\n");
+        for f in &report.findings {
+            let place = f
+                .line
+                .map_or_else(|| format!("`{}`", f.file), |l| format!("`{}:{l}`", f.file));
+            let cell = |s: &str| s.replace('|', "\\|").replace('\n', " ");
+            let _ = writeln!(
+                out,
+                "| {} | {} {} | {place} | {} | {} | {} |",
+                severity_label(f.severity),
+                f.rule,
+                cell(&f.title),
+                if f.snippet.is_empty() {
+                    String::new()
+                } else {
+                    format!("`{}`", cell(&f.snippet).replace('`', "'"))
+                },
+                cell(&f.why),
+                cell(&f.fix)
+            );
+        }
+        out.push('\n');
+    }
     let _ = writeln!(out, "{}", summary_line(report));
     out
+}
+
+/// `vibeguard rules`: one line per rule.
+pub fn rule_list() -> String {
+    let mut out = String::new();
+    for i in rule::catalogue() {
+        let _ = writeln!(
+            out,
+            "{:<8} {:<9} {}",
+            i.id,
+            severity_label(i.severity),
+            i.summary
+        );
+    }
+    out
+}
+
+/// `vibeguard explain ID`.
+pub fn explain(i: &RuleInfo) -> String {
+    let confidence = match i.confidence {
+        Confidence::High => "high",
+        Confidence::Medium => "medium (read the code before acting)",
+    };
+    format!(
+        "{} {}\nSeverity: {} · Confidence: {confidence}\n\n{}\n\nSilence one finding with a comment on the line or the line above:\n  vibeguard-ignore: {} <reason>\n",
+        i.id,
+        i.title,
+        severity_label(i.severity),
+        i.explanation,
+        i.id
+    )
 }
 
 /// The full report as pretty-printed JSON.
@@ -156,13 +239,21 @@ mod tests {
                 ..Summary::default()
             },
             internal_errors: Vec::new(),
+            ignored: Vec::new(),
+            baselined: 0,
         }
     }
 
     #[test]
     fn masks_secrets_in_every_format() {
         let r = report_with_secret();
-        for text in [pretty(&r, false, false), pretty(&r, true, false), json(&r)] {
+        for text in [
+            pretty(&r, false, false, false),
+            pretty(&r, true, false, false),
+            json(&r),
+            markdown(&r),
+            crate::sarif::render(&r),
+        ] {
             assert!(!text.contains(&secret()), "full secret leaked:\n{text}");
             assert!(
                 text.contains(&mask(&secret())),
@@ -188,6 +279,6 @@ mod tests {
 
     #[test]
     fn no_color_means_no_escape_codes() {
-        assert!(!pretty(&report_with_secret(), false, false).contains('\x1b'));
+        assert!(!pretty(&report_with_secret(), false, false, false).contains('\x1b'));
     }
 }

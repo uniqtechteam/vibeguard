@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use super::{Meta, line_no, short};
-use crate::rule::Rule;
+use crate::rule::{Rule, RuleInfo};
 use crate::{Confidence, Finding, Project, Severity, SourceFile};
 
 fn is_js(file: &SourceFile) -> bool {
@@ -35,13 +35,14 @@ const PAY_001: Meta = Meta {
     confidence: Confidence::High,
 };
 
-impl Rule for UnverifiedWebhook {
-    fn id(&self) -> &'static str {
-        PAY_001.id
-    }
+const PAY_001_INFO: RuleInfo = PAY_001.info(
+    "Stripe webhooks without signature check",
+    "A webhook that trusts the posted JSON can be called by anyone with a fake checkout.session.completed and unlock paid features for free. Read the raw body and call stripe.webhooks.constructEvent with the Stripe-Signature header and your webhook secret before acting on the event.",
+);
 
-    fn title(&self) -> &'static str {
-        PAY_001.title
+impl Rule for UnverifiedWebhook {
+    fn info(&self) -> &'static RuleInfo {
+        &PAY_001_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
@@ -156,13 +157,14 @@ fn is_request_value(expr: &str, names: &BTreeSet<String>) -> bool {
     names.contains(core)
 }
 
-impl Rule for ClientChosenPrice {
-    fn id(&self) -> &'static str {
-        PAY_002.id
-    }
+const PAY_002_INFO: RuleInfo = PAY_002.info(
+    "Payment amounts taken from the request",
+    "When unit_amount or amount comes from the request body, a customer can change it and pay whatever they like. Look the price up on the server from a product id or use a Stripe Price id.",
+);
 
-    fn title(&self) -> &'static str {
-        PAY_002.title
+impl Rule for ClientChosenPrice {
+    fn info(&self) -> &'static RuleInfo {
+        &PAY_002_INFO
     }
 
     fn check(&self, project: &Project) -> Vec<Finding> {
