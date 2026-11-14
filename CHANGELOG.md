@@ -33,3 +33,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
     row (`using (true)` / `with check (true)`). Public read policies are fine and not reported.
   - **DB-003** reports upload policies on `storage.objects` that never check who is uploading, when a
     public bucket exists.
+  - **PAY-001** reports Stripe webhook handlers that act on events (`checkout.session.completed`,
+    `invoice.*`, …) without ever calling `stripe.webhooks.constructEvent`.
+  - **PAY-002** reports `checkout.sessions.create` / `paymentIntents.create` calls whose `amount` or
+    `unit_amount` comes straight from the request body. Server-side price lookups are fine.
+- Client tokens that are public by design (for example Paddle's `CLIENT_TOKEN`) are no longer reported by
+  SEC-003.

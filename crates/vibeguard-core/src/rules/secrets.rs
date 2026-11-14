@@ -287,6 +287,8 @@ const SEC_003_WEAK: Meta = Meta {
 /// Names that are public by design even though they say KEY or TOKEN.
 const PUBLIC_BY_DESIGN: &[&str] = &[
     "ANON",
+    "CLIENT_TOKEN",
+    "CLIENT_ID",
     "PUBLISHABLE",
     "PUBLIC_KEY",
     "SITE_KEY",
@@ -419,6 +421,7 @@ mod tests {
         assert!(classify("NEXT_PUBLIC_SUPABASE_ANON_KEY").is_none());
         assert!(classify("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY").is_none());
         assert!(classify("NEXT_PUBLIC_FIREBASE_API_KEY").is_none());
+        assert!(classify("NEXT_PUBLIC_PADDLE_CLIENT_TOKEN").is_none());
         assert!(classify("NEXT_PUBLIC_SITE_URL").is_none());
     }
 }

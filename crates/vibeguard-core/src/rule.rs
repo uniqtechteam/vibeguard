@@ -16,6 +16,7 @@ pub trait Rule: Send + Sync {
 #[must_use]
 pub fn all() -> Vec<Box<dyn Rule>> {
     use crate::rules::secrets::{CommittedSecrets, SecretInClientVariable, ServiceRoleInBrowser};
+    use crate::rules::stripe::{ClientChosenPrice, UnverifiedWebhook};
     use crate::rules::supabase::{OpenStorageUpload, OpenWritePolicy, TableWithoutRls};
     vec![
         Box::new(CommittedSecrets),
@@ -24,5 +25,7 @@ pub fn all() -> Vec<Box<dyn Rule>> {
         Box::new(TableWithoutRls),
         Box::new(OpenWritePolicy),
         Box::new(OpenStorageUpload),
+        Box::new(UnverifiedWebhook),
+        Box::new(ClientChosenPrice),
     ]
 }

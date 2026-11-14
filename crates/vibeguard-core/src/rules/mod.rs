@@ -1,6 +1,7 @@
 //! The built-in rules and small helpers they share.
 
 pub mod secrets;
+pub mod stripe;
 pub mod supabase;
 
 use crate::{Confidence, Finding, Severity, SourceFile};
