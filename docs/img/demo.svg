@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="684" viewBox="0 0 960 684" role="img" aria-label="vibeguard scanning a demo app and reporting problems">
+<rect width="960" height="684" rx="10" fill="#0d1117"/>
+<circle cx="22" cy="20" r="6" fill="#ff5f57"/><circle cx="42" cy="20" r="6" fill="#febc2e"/><circle cx="62" cy="20" r="6" fill="#28c840"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+<text x="20" y="58" xml:space="preserve" fill="#e6edf3">$ vibeguard scan demo-app</text>
+<text x="20" y="78" xml:space="preserve" fill="#c9d1d9"></text>
+<text x="20" y="98" xml:space="preserve" fill="#ff7b72" font-weight="700">CRITICAL</text>
+<text x="20" y="118" xml:space="preserve" fill="#e6edf3">  <tspan font-weight="700">PAY-001</tspan> Stripe webhook without signature check</text>
+<text x="20" y="138" xml:space="preserve" fill="#8b949e">    app/api/stripe/webhook/route.ts:6</text>
+<text x="20" y="158" xml:space="preserve" fill="#a5d6ff">    &gt; if (event.type === &#x27;checkout.session.completed&#x27;) {</text>
+<text x="20" y="178" xml:space="preserve" fill="#8b949e">    Why:<tspan fill="#c9d1d9"> This webhook acts on Stripe events without checking Stripe&#x27;s signature, so anyone can</tspan></text>
+<text x="20" y="198" xml:space="preserve" fill="#c9d1d9">         send a fake &quot;payment succeeded&quot; and get the product for free.</text>
+<text x="20" y="218" xml:space="preserve" fill="#8b949e">    Fix:<tspan fill="#c9d1d9"> Read the raw body and call `stripe.webhooks.constructEvent(body, signature,</tspan></text>
+<text x="20" y="238" xml:space="preserve" fill="#c9d1d9">         webhookSecret)` before trusting the event.</text>
+<text x="20" y="258" xml:space="preserve" fill="#c9d1d9"></text>
+<text x="20" y="278" xml:space="preserve" fill="#e6edf3">  <tspan font-weight="700">SEC-002</tspan> Supabase service-role key in browser code</text>
+<text x="20" y="298" xml:space="preserve" fill="#8b949e">    components/AdminTable.tsx:4</text>
+<text x="20" y="318" xml:space="preserve" fill="#a5d6ff">    &gt; const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_R</text>
+<text x="20" y="338" xml:space="preserve" fill="#8b949e">    Why:<tspan fill="#c9d1d9"> This code runs in the browser, and the service-role key skips every Row Level Security</tspan></text>
+<text x="20" y="358" xml:space="preserve" fill="#c9d1d9">         rule, so anyone can read and change all of your data with it.</text>
+<text x="20" y="378" xml:space="preserve" fill="#8b949e">    Fix:<tspan fill="#c9d1d9"> Use the anon key in the browser and move anything that needs the service-role key into</tspan></text>
+<text x="20" y="398" xml:space="preserve" fill="#c9d1d9">         a server route or edge function.</text>
+<text x="20" y="418" xml:space="preserve" fill="#c9d1d9"></text>
+<text x="20" y="438" xml:space="preserve" fill="#e6edf3">  <tspan font-weight="700">DB-001</tspan> Supabase table without Row Level Security</text>
+<text x="20" y="458" xml:space="preserve" fill="#8b949e">    supabase/migrations/20250101000000_init.sql:1</text>
+<text x="20" y="478" xml:space="preserve" fill="#a5d6ff">    &gt; create table profiles (</text>
+<text x="20" y="498" xml:space="preserve" fill="#8b949e">    Why:<tspan fill="#c9d1d9"> Table `profiles` has no Row Level Security, so anyone with your public anon key can</tspan></text>
+<text x="20" y="518" xml:space="preserve" fill="#c9d1d9">         read and change every row.</text>
+<text x="20" y="538" xml:space="preserve" fill="#8b949e">    Fix:<tspan fill="#c9d1d9"> Add `alter table profiles enable row level security;` in a migration, then add policies</tspan></text>
+<text x="20" y="558" xml:space="preserve" fill="#c9d1d9">         that limit rows to their owner.</text>
+<text x="20" y="578" xml:space="preserve" fill="#c9d1d9"></text>
+<text x="20" y="598" xml:space="preserve" fill="#f0883e" font-weight="700">HIGH</text>
+<text x="20" y="618" xml:space="preserve" fill="#8b949e">  …</text>
+<text x="20" y="638" xml:space="preserve" fill="#c9d1d9"></text>
+<text x="20" y="658" xml:space="preserve" fill="#e6edf3" font-weight="700">3 critical · 4 high · 0 medium · 1 low · 8 files in 0.01s</text>
+</g>
+</svg>

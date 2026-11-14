@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="312" viewBox="0 0 640 312" role="img" aria-label="vibeguard scan time by project size">
+<style>
+  .title { font: 600 16px system-ui, sans-serif; fill: #1f2328; }
+  .axis, .value { font: 13px system-ui, sans-serif; fill: #1f2328; }
+  .note { font: 11px system-ui, sans-serif; fill: #59636e; }
+  .bar { fill: #2f7d4f; }
+  @media (prefers-color-scheme: dark) {
+    .title, .axis, .value { fill: #e6edf3; } .note { fill: #9198a1; } .bar { fill: #3fb950; }
+  }
+</style>
+<text x="120" y="30" class="title">Time to scan a whole project (median of 5 runs)</text>
+<text x="108" y="78.0" text-anchor="end" class="axis">1,000 files</text><rect x="120" y="56" width="13.1" height="34" rx="4" class="bar"/><text x="141.1" y="78.0" class="value">16 ms</text><text x="108" y="128.0" text-anchor="end" class="axis">5,000 files</text><rect x="120" y="106" width="42.9" height="34" rx="4" class="bar"/><text x="170.9" y="128.0" class="value">51 ms</text><text x="108" y="178.0" text-anchor="end" class="axis">20,000 files</text><rect x="120" y="156" width="152.5" height="34" rx="4" class="bar"/><text x="280.5" y="178.0" class="value">182 ms</text><text x="108" y="228.0" text-anchor="end" class="axis">50,000 files</text><rect x="120" y="206" width="400.0" height="34" rx="4" class="bar"/><text x="528.0" y="228.0" class="value">476 ms</text>
+<text x="120" y="294" class="note">vibeguard 0.1.0-rc.1 · 12th Gen Intel(R) Core(TM) i7-12700, 20 threads, Linux · 2026-11-14 · bench/speed.py</text>
+</svg>
