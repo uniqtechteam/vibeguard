@@ -1,0 +1,18 @@
+[workspace]
+resolver = "3"
+members = ["crates/vibeguard", "crates/vibeguard-core"]
+
+[workspace.package]
+version = "0.1.0-dev"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/uniqtechteam/vibeguard"
+homepage = "https://github.com/uniqtechteam/vibeguard"
+authors = ["UniqTech <https://uniqtech.dev>"]
+keywords = ["security", "audit", "supabase", "nextjs", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+
+[workspace.dependencies]
+vibeguard-core = { path = "crates/vibeguard-core", version = "0.1.0-dev" }
+clap = { version = "4.5", features = ["derive"] }
