@@ -129,7 +129,10 @@ mod tests {
     use vibeguard_core::mask::mask_in;
     use vibeguard_core::{Summary, mask::mask};
 
-    const SECRET: &str = "sk_live_51HabcdefghijklmnWXYZ";
+    // Assembled from pieces so no key-shaped string sits in the repository.
+    fn secret() -> String {
+        ["sk", "_live_", "51Habcdefghijklmn", "WXYZ"].concat()
+    }
 
     fn report_with_secret() -> Report {
         Report {
@@ -144,7 +147,7 @@ mod tests {
                 confidence: Confidence::High,
                 file: "src/pay.ts".into(),
                 line: Some(3),
-                snippet: mask_in(&format!("const key = \"{SECRET}\""), SECRET),
+                snippet: mask_in(&format!("const key = \"{}\"", secret()), &secret()),
                 why: "Anyone with the code can charge cards on your account.".into(),
                 fix: "Revoke the key, then read it from an environment variable.".into(),
             }],
@@ -160,8 +163,11 @@ mod tests {
     fn masks_secrets_in_every_format() {
         let r = report_with_secret();
         for text in [pretty(&r, false, false), pretty(&r, true, false), json(&r)] {
-            assert!(!text.contains(SECRET), "full secret leaked:\n{text}");
-            assert!(text.contains(&mask(SECRET)), "masked form missing:\n{text}");
+            assert!(!text.contains(&secret()), "full secret leaked:\n{text}");
+            assert!(
+                text.contains(&mask(&secret())),
+                "masked form missing:\n{text}"
+            );
         }
     }
 

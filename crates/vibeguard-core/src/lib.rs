@@ -8,6 +8,7 @@ pub mod mask;
 mod project;
 mod report;
 pub mod rule;
+mod rules;
 
 use std::path::Path;
 

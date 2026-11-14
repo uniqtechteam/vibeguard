@@ -32,10 +32,21 @@ pub fn mask_in(text: &str, secret: &str) -> String {
 mod tests {
     use super::*;
 
+    // Test secrets are assembled from pieces so no key-shaped string sits in the repository.
+    fn fake(parts: &[&str]) -> String {
+        parts.concat()
+    }
+
     #[test]
     fn keeps_prefix_and_last_four() {
-        assert_eq!(mask("sk_live_51HabcdefghijWXYZ"), "sk_live_****WXYZ");
-        assert_eq!(mask("ghp_abcdefghijklmnopqrstuvwxyz12"), "ghp_****yz12");
+        assert_eq!(
+            mask(&fake(&["sk", "_live_", "51Habcdefghij", "WXYZ"])),
+            "sk_live_****WXYZ"
+        );
+        assert_eq!(
+            mask(&fake(&["ghp", "_abcdefghijklmnopqrstuvwxyz", "12"])),
+            "ghp_****yz12"
+        );
     }
 
     #[test]
@@ -45,15 +56,13 @@ mod tests {
 
     #[test]
     fn no_prefix_keeps_only_the_tail() {
-        assert_eq!(mask("AKIAABCDEFGHIJKLMNOP"), "****MNOP");
+        assert_eq!(mask(&fake(&["AKIA", "ABCDEFGHIJKL", "MNOP"])), "****MNOP");
     }
 
     #[test]
     fn masks_inside_a_line() {
-        let line = "STRIPE_KEY=sk_live_51HabcdefghijWXYZ # prod";
-        assert_eq!(
-            mask_in(line, "sk_live_51HabcdefghijWXYZ"),
-            "STRIPE_KEY=sk_live_****WXYZ # prod"
-        );
+        let key = fake(&["sk", "_live_", "51Habcdefghij", "WXYZ"]);
+        let line = format!("STRIPE_KEY={key} # prod");
+        assert_eq!(mask_in(&line, &key), "STRIPE_KEY=sk_live_****WXYZ # prod");
     }
 }

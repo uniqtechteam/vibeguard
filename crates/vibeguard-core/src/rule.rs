@@ -15,5 +15,10 @@ pub trait Rule: Send + Sync {
 /// Every rule, in the order they run.
 #[must_use]
 pub fn all() -> Vec<Box<dyn Rule>> {
-    Vec::new()
+    use crate::rules::secrets::{CommittedSecrets, SecretInClientVariable, ServiceRoleInBrowser};
+    vec![
+        Box::new(CommittedSecrets),
+        Box::new(ServiceRoleInBrowser),
+        Box::new(SecretInClientVariable),
+    ]
 }
