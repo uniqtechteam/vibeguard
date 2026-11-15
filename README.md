@@ -1,6 +1,7 @@
 # vibeguard
 
 [![CI](https://github.com/uniqtechteam/vibeguard/actions/workflows/ci.yml/badge.svg)](https://github.com/uniqtechteam/vibeguard/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/vibeguard)](https://crates.io/crates/vibeguard)
 [![License: MIT or Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#licence)
 
 vibeguard finds the problems that apps built quickly with AI tools tend to ship with: database tables
@@ -11,12 +12,12 @@ on your machine, sends nothing anywhere, and explains each finding in one senten
 
 ## Install
 
-Download the binary for your system from [Releases](https://github.com/uniqtechteam/vibeguard/releases)
-(Linux, macOS and Windows, with SHA-256 checksums), or build it with Rust:
-
 ```bash
-cargo install --locked --git https://github.com/uniqtechteam/vibeguard vibeguard
+cargo install --locked vibeguard
 ```
+
+Or download the binary for your system from [Releases](https://github.com/uniqtechteam/vibeguard/releases)
+(Linux, macOS and Windows, with SHA-256 checksums).
 
 ## Quick start
 
@@ -146,7 +147,7 @@ vibeguard は、AI ツールで素早く作られたアプリによくある問�
 一文で示します。
 
 ```bash
-cargo install --locked --git https://github.com/uniqtechteam/vibeguard vibeguard
+cargo install --locked vibeguard
 vibeguard scan
 ```
 
