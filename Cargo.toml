@@ -22,7 +22,7 @@ ignore = "0.4"
 tempfile = "3"
 regex = "1"
 base64 = "0.22"
-toml = "0.8"
+toml = "1.2"
 globset = "0.4"
 jsonschema = { version = "0.61", default-features = false }
 
