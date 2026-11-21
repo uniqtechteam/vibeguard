@@ -1,0 +1,30 @@
+name: Bug report
+description: Something does not work as the docs say.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got instead. Paste the full output.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The smallest input or steps that show it.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `vibeguard --version`, or the crate version in Cargo.lock.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: OS and Rust version
+      placeholder: Ubuntu 24.04, rustc 1.100
